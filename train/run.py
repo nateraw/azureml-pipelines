@@ -11,8 +11,9 @@ def main(
     output_dir: str = './outputs',
     logging_dir: str = './logs',
     num_train_epochs: int = 2,
+    model_name_or_path: str = 'distilbert-base-cased',
 ):
-    model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-cased", num_labels=2)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name_or_path, num_labels=2)
     small_train_dataset = Dataset.load_from_disk(Path(input_dir) / 'train')
     small_eval_dataset = Dataset.load_from_disk(Path(input_dir) / 'eval')
 
