@@ -7,12 +7,14 @@ from transformers import (AutoModelForSequenceClassification, Trainer,
 
 
 def main(
-    input_dir: str = os.environ.get('AZUREML_DATAREFERENCE_prepared_data', './data_dir'),
+    input_dir: str = "./data_dir",
     output_dir: str = './outputs',
     logging_dir: str = './logs',
     num_train_epochs: int = 2,
     model_name_or_path: str = 'distilbert-base-cased',
+    seed: int = 42,
 ):
+    print("\n\nINPUT DIR:", input_dir, "\n\n")
     model = AutoModelForSequenceClassification.from_pretrained(model_name_or_path, num_labels=2)
     small_train_dataset = Dataset.load_from_disk(Path(input_dir) / 'train')
     small_eval_dataset = Dataset.load_from_disk(Path(input_dir) / 'eval')
@@ -23,6 +25,7 @@ def main(
         logging_dir=logging_dir,
         report_to='tensorboard',
         logging_steps=10,
+        seed=seed,
     )
 
     trainer = Trainer(

@@ -130,3 +130,6 @@ dmypy.json
 
 # extra stuff to ignore
 config.json
+
+# This was the output from the service principal creation command
+workspace.json
