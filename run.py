@@ -1,8 +1,7 @@
 """Run a basic transformers text classificaiton workflow using AzureML pipelines.
 
 TODO:
-  - Use PipelineParameter to parameterize the workflow.
-  - Use separate compute for train step, making sure train step works on GPU
+  [ ] Use PipelineParameter to parameterize the workflow.
 """
 from pathlib import Path
 
@@ -14,7 +13,7 @@ from azureml.core.runconfig import MpiConfiguration, DockerConfiguration
 from azureml.core.authentication import ServicePrincipalAuthentication
 
 
-def find_or_create_compute_target(
+def create_compute_target(
     workspace,
     name="my-cluster",
     instance_type="Standard_DS11_v2",
@@ -38,7 +37,7 @@ def find_or_create_compute_target(
     return target
 
 
-def create_environment(environment_name: str, requirements_file: Path, docker_image=None):
+def get_environment(environment_name: str, requirements_file: Path, docker_image=None):
     requirements_file = Path(requirements_file)
     if not requirements_file.exists():
         raise RuntimeError(f"Given requirements file '{requirements_file}' does not exist at the provided path")
@@ -56,7 +55,7 @@ def create_environment(environment_name: str, requirements_file: Path, docker_im
 
 
 def get_workspace(
-    workspace_config=None,
+    workspace_config='config.json',
     subscription_id=None,
     resource_group=None,
     workspace_name=None,
@@ -64,6 +63,7 @@ def get_workspace(
     client_id=None,
     client_secret=None
 ):
+
     do_use_service_principal = all([tenant_id, client_id, client_secret])
     if do_use_service_principal:
         auth = ServicePrincipalAuthentication(
@@ -87,7 +87,7 @@ def get_workspace(
     return ws
 
 
-def create_step(
+def create_pipeline_step(
     script_path,
     name,
     compute_target,
@@ -105,7 +105,7 @@ def create_step(
         source_directory=script_path.parent,
         script=script_path.name,
         compute_target=compute_target,
-        environment=create_environment(environment_name, requirements_file, docker_image),
+        environment=get_environment(environment_name, requirements_file, docker_image),
         distributed_job_config=None if num_nodes == 1 else MpiConfiguration(process_count_per_node=1, node_count=num_nodes),
         docker_runtime_config=DockerConfiguration(use_docker=docker_image is not None),
     )
@@ -124,11 +124,22 @@ def create_step(
 
 def main(
     ################################
+    # Workspace Configuration
+    ################################
+    workspace_config='config.json',
+    experiment_name='basic-transformers-pipeline',
+    subscription_id=None,
+    resource_group=None,
+    workspace_name=None,
+    tenant_id=None,
+    client_id=None,
+    client_secret=None,
+    ################################
     # Prep Step Configuration
     ################################
-    prepare_script_path='prep/run.py',
+    prepare_script_path='./basic_transformers_imdb/prep/run.py',
     prepare_environment_name='transformers_basic_prep_env',
-    prepare_requirements_file='prep/environment.yaml',
+    prepare_requirements_file='./basic_transformers_imdb/prep/environment.yaml',
     prepare_docker_image=None,
     prepare_compute_target_name='cpu-cluster',
     prepare_instance_type='Standard_DS11_v2',
@@ -139,9 +150,9 @@ def main(
     ################################
     # Train Step Configuration
     ################################
-    train_script_path='train/run.py',
+    train_script_path='./basic_transformers_imdb/train/run.py',
     train_environment_name='transformers_basic_train_env',
-    train_requirements_file='train/environment.yaml',
+    train_requirements_file='./basic_transformers_imdb/train/environment.yaml',
     train_docker_image='mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.3-cudnn8-ubuntu20.04',
     train_compute_target_name='gpu-cluster',
     train_instance_type="Standard_NC6",
@@ -150,16 +161,10 @@ def main(
     train_idle_seconds_before_scaledown=240,
     train_vm_priority="dedicated",
     ################################
-    # Workspace Configuration
+    # Step Script Args
     ################################
-    workspace_config='config.json',
-    experiment_name='basic-transformers-pipeline',
-    subscription_id=None,
-    resource_group=None,
-    workspace_name=None,
-    tenant_id=None,
-    client_id=None,
-    client_secret=None
+    prepare_script_args: str = "--model_name_or_path distilbert-base-cased --seed 42",
+    train_script_args: str = "--model_name_or_path distilbert-base-cased --num_train_epochs 2 --seed 1234",
 ):
     workspace = get_workspace(
         workspace_config,
@@ -174,12 +179,12 @@ def main(
     # Define pipeline data, the data that will be passed between steps
     datastore = workspace.get_default_datastore()
     prepared_dataset = PipelineData("prepared_data", datastore=datastore).as_dataset()
-    prepared_dataset = prepared_dataset.register(name="prepared_data")
+    # prepared_dataset = prepared_dataset.register(name="prepared_data")
 
-    prep_step = create_step(
+    prep_step = create_pipeline_step(
         prepare_script_path,
         name="Preparation Step",
-        compute_target=find_or_create_compute_target(
+        compute_target=create_compute_target(
             workspace,
             name=prepare_compute_target_name,
             instance_type=prepare_instance_type,
@@ -191,15 +196,15 @@ def main(
         inputs=None,
         outputs=[prepared_dataset],
         allow_reuse=True,
-        arguments=["--model_name_or_path", "distilbert-base-cased", "--seed", 42],
+        arguments=prepare_script_args.split(),
         environment_name=prepare_environment_name,
         requirements_file=prepare_requirements_file,
         docker_image=prepare_docker_image,
     )
-    train_step = create_step(
+    train_step = create_pipeline_step(
         train_script_path,
         name="Training Step",
-        compute_target=find_or_create_compute_target(
+        compute_target=create_compute_target(
             workspace,
             name=train_compute_target_name,
             instance_type=train_instance_type,
@@ -210,7 +215,7 @@ def main(
         ),
         outputs=None,
         allow_reuse=False,
-        arguments=["--input_dir", prepared_dataset.as_mount(), "--model_name_or_path", "distilbert-base-cased", "--num_train_epochs", 2, "--seed", 1234],
+        arguments=["--input_dir", prepared_dataset.as_mount()] + train_script_args.split(),
         environment_name=train_environment_name,
         requirements_file=train_requirements_file,
         docker_image=train_docker_image,

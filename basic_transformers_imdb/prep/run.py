@@ -16,8 +16,8 @@ def main(
     def tokenize_function(examples):
         return tokenizer(examples["text"], padding="max_length", truncation=True)
 
-    small_train_dataset = ds["train"].shuffle(seed=seed).select(range(1000)).map(tokenize_function, batched=True)
-    small_eval_dataset = ds["test"].shuffle(seed=seed).select(range(1000)).map(tokenize_function, batched=True)
+    small_train_dataset = ds["train"].shuffle(seed=seed).select(range(100)).map(tokenize_function, batched=True)
+    small_eval_dataset = ds["test"].shuffle(seed=seed).select(range(100)).map(tokenize_function, batched=True)
 
     small_train_dataset.save_to_disk(Path(output_dir) / "train")
     small_eval_dataset.save_to_disk(Path(output_dir) / "eval")

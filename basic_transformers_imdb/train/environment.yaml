@@ -10,3 +10,5 @@ dependencies:
     - fire==0.4.0
     - torch==1.12.1
     - tensorboard==2.10.0
+    - mlflow
+    - azureml-mlflow

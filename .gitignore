@@ -133,3 +133,8 @@ config.json
 
 # This was the output from the service principal creation command
 workspace.json
+.DS_Store
+configs
+data_dir
+outputs
+main.py
