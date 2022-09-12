@@ -1,18 +1,7 @@
 name: Run on AzureML
 
-# env:
-#   AZURE_WORKSPACE_NAME: "my-ml-workspace"
-#   AZURE_RESOURCE_GROUP: "ml-rsg"
-
-  # TODO - Read json creds with https://stackoverflow.com/a/61919791
-
-  # TODO - Maybe instead of below, we take in json for secret and do:
-  # echo "{environment_variable_name}={value}" >> $GITHUB_ENV
-  # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
-  # AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  # AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  # AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  # AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+env:
+  CONTENT: ${{ secrets.AZURE_CREDENTIALS }}
 
 on:
   push:
@@ -32,7 +21,7 @@ jobs:
     steps:
       - id: set_var
         run: |
-          content=${{ secrets.AZURE_CREDENTIALS }}
+          content="${{ env.CONTENT }}"
           # the following lines are only required for multi line json
           content="${content//'%'/'%25'}"
           content="${content//$'\n'/'%0A'}"
