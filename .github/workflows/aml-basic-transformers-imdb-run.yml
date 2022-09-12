@@ -1,8 +1,5 @@
 name: Run on AzureML
 
-env:
-  CONTENT: ${{ secrets.AZURE_CREDENTIALS }}
-
 on:
   push:
     branches:
@@ -15,42 +12,21 @@ permissions:
   contents: read
 
 jobs:
-  testJob:
-    name: Test
+  deploy:
+
     runs-on: ubuntu-latest
+
     steps:
-      - id: set_var
-        run: |
-          content=${{ env.CONTENT }}
-          echo '$content'
-          # the following lines are only required for multi line json
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
-          # end of optional handling for multi line json
-          echo "::set-output name=packageJson::$content"
-      - run: |
-          echo "${{fromJson(steps.set_var.outputs.packageJson).galleryEndpointUrl}}"
-
-# jobs:
-#   deploy:
-
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - uses: actions/checkout@v3
-#     - name: Set up Python
-#       uses: actions/setup-python@v3
-#       with:
-#         python-version: '3.x'
-#     - name: Read JSON
-#       run: |
-        
-    # - name: Install dependencies
-    #   run: |
-    #     python -m pip install --upgrade pip
-    #     pip install azureml-core 
-    # - name: Run on AzureML
-    #   run: |
-    #     python run.py ... args go here
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install azureml-core azureml-pipeline-core azureml-pipeline-steps azureml-mlflow
+    - name: Run on AzureML
+      run: |
+        python run.py --subscription_id ${{ secrets.AZURE_SUBSCRIPTION_ID }} --resource_group nate-azureml-rsg --workspace_name nate-ml-2 --tenant_id ${{ secrets.AZURE_TENANT_ID }} --client_id ${{ secrets.AZURE_CLIENT_ID }} --client_secret ${{ secrets.AZURE_CLIENT_SECRET }} --experiment_name transformers-pipeline-ci
 
