@@ -22,6 +22,7 @@ jobs:
       - id: set_var
         run: |
           content="${{ env.CONTENT }}"
+          echo $content
           # the following lines are only required for multi line json
           content="${content//'%'/'%25'}"
           content="${content//$'\n'/'%0A'}"
