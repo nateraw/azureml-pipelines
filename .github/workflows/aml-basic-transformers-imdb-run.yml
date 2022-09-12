@@ -1,8 +1,8 @@
 name: Run on AzureML
 
-env:
-  AZURE_WORKSPACE_NAME: "my-ml-workspace"
-  AZURE_RESOURCE_GROUP: "ml-rsg"
+# env:
+#   AZURE_WORKSPACE_NAME: "my-ml-workspace"
+#   AZURE_RESOURCE_GROUP: "ml-rsg"
 
   # TODO - Read json creds with https://stackoverflow.com/a/61919791
 
