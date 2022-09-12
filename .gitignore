@@ -135,6 +135,8 @@ config.json
 workspace.json
 .DS_Store
 configs
+config*
 data_dir
 outputs
 main.py
+*.sh
