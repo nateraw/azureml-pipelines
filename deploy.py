@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import fire
 from azureml.core import Experiment, Run
@@ -26,6 +26,9 @@ def main(
     score_file: str = "./basic_transformers_imdb/score/run.py",
     model_name: str = "test-transformers-model",
     service_name: str = "test-transformers-service",
+    cpu_cores: int = 4,
+    memory_gb: Union[int, float] = 8,
+    description: str = "A dummy transformers model deployment",
 ):
     # Init workspace object from azureml workspace resource you've created
     ws = get_workspace(
@@ -58,7 +61,7 @@ def main(
     )
 
     deployment_config = AciWebservice.deploy_configuration(
-        cpu_cores=1, memory_gb=1, description="A dummy transformers model deployment"
+        cpu_cores=cpu_cores, memory_gb=memory_gb, description=description
     )
 
     service = Model.deploy(
