@@ -25,9 +25,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install azureml-core
-        pip install azureml-pipeline-core azureml-pipeline-steps azureml-mlflow
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install azureml-core azureml-pipeline-core azureml-pipeline-steps azureml-mlflow
+        echo "VIRTUAL ENV:" $VIRTUAL_ENV
     - name: Run on AzureML
       run: |
+        echo "VIRTUAL ENV:" $VIRTUAL_ENV
         python run.py --subscription_id ${{ secrets.AZURE_SUBSCRIPTION_ID }} --resource_group nate-azureml-rsg --workspace_name nate-ml-2 --tenant_id ${{ secrets.AZURE_TENANT_ID }} --client_id ${{ secrets.AZURE_CLIENT_ID }} --client_secret ${{ secrets.AZURE_CLIENT_SECRET }} --experiment_name transformers-pipeline-ci
 
