@@ -40,7 +40,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Run on AzureML
+    - name: Deploy on AzureML
       run: |
         python deploy.py \
           --subscription_id ${{ secrets.AZURE_SUBSCRIPTION_ID }} \
