@@ -1,3 +1,4 @@
 azureml-core
 azureml-pipeline-core
 azureml-pipeline-steps
+fire

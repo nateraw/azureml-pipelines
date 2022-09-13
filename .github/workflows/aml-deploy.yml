@@ -1,0 +1,39 @@
+name: Deploy on AzureML
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Run ID of the model to deploy'
+        required: true
+        type: string
+      model_artifact_path:
+        description: 'Path to model artifact'
+        required: true
+        default: 'outputs/'
+        type: string
+      model_name:
+        description: 'Name for the model when registering it on AzureML'
+        required: true
+        default: 'test-transformers-model'
+        type: string
+      service_name:
+        description: 'Name of the deployment service'
+        required: true
+        default: 'test-transformers-service'
+        type: string
+
+jobs:
+  log-the-inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Run ID: $RUN_ID"
+          echo "Artifact Path: $MODEL_ARTIFACT_PATH"
+          echo "Model Name: $MODEL_NAME"
+          echo "Service Name: $SERVICE_NAME"
+        env:
+          LEVEL: ${{ inputs.run_id }}
+          MODEL_ARTIFACT_PATH: ${{ inputs.model_artifact_path }}
+          MODEL_NAME: ${{ inputs.model_name }}
+          SERVICE_NAME: ${{ inputs.service_name }}
