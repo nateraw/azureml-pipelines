@@ -8,3 +8,4 @@ dependencies:
     - transformers==4.21.2
     - datasets==2.4.0
     - fire==0.4.0
+    - cmake

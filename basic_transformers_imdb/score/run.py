@@ -10,8 +10,14 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipe
 def init():
     global pipe
 
-    model_dir = Path(os.getenv("AZUREML_MODEL_DIR", "outputs/"))
-    pipe = pipeline(model=str(model_dir), task='text-classification')
+    model_dir = Path(os.getenv("AZUREML_MODEL_DIR", "./"))
+    print("MODEL DIR:", model_dir)
+    try:
+        pipe = pipeline(model=str(model_dir / 'outputs'), task='text-classification')
+    except Exception as e:
+        print("Exception:", e)
+        raise e
+
 
 
 def run(input_data):

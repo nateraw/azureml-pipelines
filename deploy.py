@@ -3,10 +3,8 @@ from typing import Optional, Union
 
 import fire
 from azureml.core import Experiment, Run
-from azureml.core.environment import Environment
 from azureml.core.model import InferenceConfig, Model
 from azureml.core.webservice import AciWebservice
-from azureml.core.workspace import Workspace
 
 from run import get_environment, get_workspace
 
