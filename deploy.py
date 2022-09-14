@@ -20,7 +20,10 @@ def main(
     environment_name="transformers_basic_deploy_env",
     requirements_file: str = "./basic_transformers_imdb/score/environment.yaml",
     run_id: str = None,
-    model_artifact_path: str = "logs/saved_model",
+    # NOTE - The model_artifact_path refers to the cloud location of the model. 
+    # Azure will take this and put it inside a directory that you can access in
+    # your script via the AZUREML_MODEL_DIR environment variable.
+    model_artifact_path: str = "outputs/",
     score_file: str = "./basic_transformers_imdb/score/run.py",
     model_name: str = "test-transformers-model",
     service_name: str = "test-transformers-service",

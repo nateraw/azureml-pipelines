@@ -178,8 +178,7 @@ def main(
 
     # Define pipeline data, the data that will be passed between steps
     datastore = workspace.get_default_datastore()
-    prepared_dataset = PipelineData("prepared_data", datastore=datastore).as_dataset()
-    # prepared_dataset = prepared_dataset.register(name="prepared_data")
+    prepared_dataset = PipelineData("prepared_data", datastore=datastore, is_directory=True)
 
     prep_step = create_pipeline_step(
         prepare_script_path,
@@ -196,7 +195,7 @@ def main(
         inputs=None,
         outputs=[prepared_dataset],
         allow_reuse=True,
-        arguments=prepare_script_args.split(),
+        arguments=['--output_dir', prepared_dataset] + prepare_script_args.split(),
         environment_name=prepare_environment_name,
         requirements_file=prepare_requirements_file,
         docker_image=prepare_docker_image,
@@ -213,6 +212,9 @@ def main(
             idle_seconds_before_scaledown=train_idle_seconds_before_scaledown,
             vm_priority=train_vm_priority,
         ),
+        # You'll run into this if you don't put it as an input:
+        # ValueError: Input prepared_data appears in arguments list but is not in the input list
+        inputs=[prepared_dataset],
         outputs=None,
         allow_reuse=False,
         arguments=["--input_dir", prepared_dataset.as_mount()] + train_script_args.split(),

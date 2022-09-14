@@ -6,10 +6,12 @@ from transformers import AutoTokenizer
 
 
 def main(
-    output_dir: str = os.environ.get("AZUREML_DATAREFERENCE_prepared_data", "./data_dir"),
+    output_dir: str = './data_dir',
     model_name_or_path: str = "distilbert-base-cased",
     seed: int = 42,
 ):
+    print("\n\nOUTPUT DIR:", output_dir)
+
     ds = load_dataset("imdb")
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
@@ -19,8 +21,9 @@ def main(
     small_train_dataset = ds["train"].shuffle(seed=seed).select(range(100)).map(tokenize_function, batched=True)
     small_eval_dataset = ds["test"].shuffle(seed=seed).select(range(100)).map(tokenize_function, batched=True)
 
-    small_train_dataset.save_to_disk(Path(output_dir) / "train")
-    small_eval_dataset.save_to_disk(Path(output_dir) / "eval")
+    output_dir = Path(output_dir)
+    small_train_dataset.save_to_disk(output_dir / "train")
+    small_eval_dataset.save_to_disk(output_dir / "eval")
 
 
 if __name__ == '__main__':
