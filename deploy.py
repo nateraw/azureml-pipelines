@@ -26,8 +26,8 @@ def main(
     score_file: str = "./basic_transformers_imdb/score/run.py",
     model_name: str = "test-transformers-model",
     service_name: str = "test-transformers-service",
-    cpu_cores: int = 4,
-    memory_gb: Union[int, float] = 8,
+    cpu_cores: Union[int, float] = 2,
+    memory_gb: Union[int, float] = 4,
     description: str = "A dummy transformers model deployment",
 ):
     # Init workspace object from azureml workspace resource you've created
